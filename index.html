@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V8.9</title>
+    <title>DBS Production Manager V9.0 - Final Sync</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,7 +34,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Logic: Synced Deductions</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Logic: Final Synced Math</p>
                 </div>
             </div>
             <div class="bg-slate-100 p-1 rounded-full border flex gap-1 h-fit">
@@ -56,7 +56,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest border-b pb-2">Entry Form</h2>
                     <div id="entry-form" class="flex flex-col gap-4">
-                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. a" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. 2-A" oninput="validateInput()"></div>
                         <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Thickness</label>
                             <select id="thick" onchange="validateInput()">
@@ -86,7 +86,7 @@
 
             <div class="lg:col-span-9 space-y-6">
                 <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
-                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Edge-to-Edge Blueprint</h2>
+                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
                     <div id="display-frame" class="w-full h-[450px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden">
                         <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale text-center p-4">
                             <svg viewBox="0 0 500 400" width="300" height="240">
@@ -176,7 +176,7 @@
             const backWidth = itemMode === 'dovetail' ? w : w - (2*t);
             
             const udRaw = parseFloat(data.uDepth) || 0;
-            // NEW SYNCED LOGIC: Notch depth now includes the same deduction factor as the sides
+            // SYNCED MATH: Pocket depth uses (Thickness - Deduction) logic for Dovetail
             const udDisplay = itemMode === 'dovetail' ? (udRaw + t - deduction) : (udRaw + t);
             
             const laVal = parseFloat(data.lArm);
@@ -185,10 +185,8 @@
             
             const margin = 85;
             const scale = Math.min((500-margin*2)/w, (400-margin*2)/d);
-            const dW = w * scale; 
-            const dD = d * scale; 
-            const dLA = laVal * scale; 
-            const dRA = raVal * scale;
+            const dW = w * scale; const dD = d * scale; 
+            const dLA = laVal * scale; const dRA = raVal * scale;
             const dUD = udDisplay * scale;
             const x0 = (500 - dW) / 2; const y0 = (400 - dD) / 2;
 
@@ -212,7 +210,6 @@
                 
                 <line x1="${x0}" y1="${y0-25}" x2="${x0+dLA}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0+dLA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${laVal.toFixed(3)}</text>
-                
                 <line x1="${x0+dW-dRA}" y1="${y0-25}" x2="${x0+dW}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0+dW-dRA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${raVal.toFixed(3)}</text>
                 
