@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V10.3 - Deep Notch Fix</title>
+    <title>DBS Production Manager V10.5 - Compact Inputs</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -11,22 +11,28 @@
         .mode-dowel { --brand-primary: #2563eb; --brand-dark: #1e293b; }
         .mode-dovetail { --brand-primary: #d97706; --brand-dark: #451a03; }
         .brand-shadow { box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05); }
+        
         .input-group label { @apply block text-[10px] font-bold text-slate-500 uppercase mb-1 tracking-wider; }
         .input-group input, .input-group select { @apply border border-slate-300 rounded p-2 w-full bg-yellow-50 focus:bg-white outline-none transition-all text-sm; }
-        .arm-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 0.5rem; width: 100%; }
-        .arm-grid input { width: 100% !important; min-width: 0; }
+        
+        /* V10.5 RIGID LAYOUT FIX: Prevents Arm inputs from extending out */
+        .arm-container { display: flex; justify-content: space-between; width: 100%; gap: 4%; }
+        .arm-item { width: 48%; }
+        .arm-item input { width: 100% !important; min-width: 0 !important; }
+
         #preview-svg { display: none; }
         .is-live #preview-svg { display: block; }
         .is-live #static-reference { display: none; }
+
         @media print {
             @page { size: landscape; margin: 3mm; }
             .no-print { display: none !important; }
             .print-area { display: block !important; width: 100%; }
             #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-            .item-container { border: 3px solid #000; padding: 0px !important; height: 48.5vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: space-between; overflow: hidden; }
+            .item-container { border: 3px solid #000; padding: 0px; height: 48.5vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: hidden; background: #fff; }
             svg { width: 100% !important; height: 100% !important; max-height: none !important; margin: 0 !important; }
-            .print-header { width: 100%; border-bottom: 2px solid #000; padding: 2px 8px; font-size: 14px; font-weight: 900; display: flex; justify-content: space-between; background: #fff; z-index: 10; }
-            .print-sub { font-size: 11px; font-weight: bold; width: 100%; text-align: center; padding: 2px 0; border-bottom: 1px solid #ddd; background: #fff; z-index: 10; }
+            .print-header { width: 100%; border-bottom: 2px solid #000; padding: 2px 8px; font-size: 14px; font-weight: 900; display: flex; justify-content: space-between; background: #fff; }
+            .print-sub { font-size: 11px; font-weight: bold; width: 100%; text-align: center; padding: 2px 0; border-bottom: 1px solid #000; background: #fff; }
         }
     </style>
 </head>
@@ -38,7 +44,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V10.3 - Deep Notch Overlap Fix</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V10.5 - Input Width Correction</p>
                 </div>
             </div>
             <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
@@ -77,13 +83,22 @@
                         <div class="input-group"><label>Box Width (W)*</label><input type="number" id="width" placeholder="0.000" oninput="validateInput()"></div>
                         <div class="input-group"><label>Box Depth (D)*</label><input type="number" id="depth" placeholder="0.000" oninput="validateInput()"></div>
                         <div class="input-group"><label>Box Height (H)*</label><input type="number" id="height" placeholder="0.000" oninput="validateInput()"></div>
+                        
                         <div class="border-t pt-4">
                             <div class="input-group"><label>U-Shape Pocket Depth*</label><input type="number" id="uDepth" placeholder="0.000" oninput="validateInput()"></div>
-                            <div class="arm-grid mt-4">
-                                <div class="input-group"><label>Left Arm*</label><input type="number" id="lArm" placeholder="0.000" oninput="validateInput()"></div>
-                                <div class="input-group"><label>Right Arm*</label><input type="number" id="rArm" placeholder="0.000" oninput="validateInput()"></div>
+                            
+                            <div class="arm-container mt-4">
+                                <div class="arm-item input-group">
+                                    <label>Left Arm*</label>
+                                    <input type="number" id="lArm" placeholder="0.000" oninput="validateInput()">
+                                </div>
+                                <div class="arm-item input-group">
+                                    <label>Right Arm*</label>
+                                    <input type="number" id="rArm" placeholder="0.000" oninput="validateInput()">
+                                </div>
                             </div>
                         </div>
+
                         <div class="flex flex-col gap-2 mt-4">
                             <button id="add-btn" onclick="addToQueue()" class="w-full bg-slate-300 text-white font-bold py-4 rounded shadow uppercase tracking-widest text-xs cursor-not-allowed" disabled>Add to Queue</button>
                             <button onclick="resetForm()" class="w-full bg-slate-100 hover:bg-slate-200 text-slate-500 font-bold py-2 rounded transition-all uppercase tracking-widest text-[10px]">Manual Clear Form</button>
@@ -156,9 +171,7 @@
             const chip = document.getElementById('status-chip');
             const btnDovetail = document.getElementById('btn-dovetail');
             const btnDowel = document.getElementById('btn-dowel');
-            
             resetForm(); 
-
             if (mode === 'dovetail') {
                 body.className = 'p-4 md:p-8 mode-dovetail';
                 header.className = 'bg-orange-950 p-4 text-white flex justify-between items-center rounded-b-xl shadow-lg border-t border-orange-800';
@@ -213,8 +226,8 @@
 
             const gap = w - (laVal + raVal);
             const isPrint = svgId.includes('svg-p');
-            const hMargin = isPrint ? 30 : 85;
-            const vMargin = isPrint ? 40 : 85;
+            const hMargin = isPrint ? 35 : 85; 
+            const vMargin = isPrint ? 50 : 85; 
 
             const scale = Math.min((500 - hMargin * 2) / w, (400 - vMargin * 2) / d);
             const dW = w * scale; const dD = d * scale; 
@@ -224,16 +237,11 @@
 
             const path = `M ${x0} ${y0} L ${x0+sLA} ${y0} L ${x0+sLA} ${y0+sUD} L ${x0+dW-sRA} ${y0+sUD} L ${x0+dW-sRA} ${y0} L ${x0+dW} ${y0} L ${x0+dW} ${y0+dD} L ${x0} ${y0+dD} Z`;
 
-            // V10.3 DYNAMIC POSITIONING FOR DEEP NOTCHES
             const woodBottomY = y0 + dD;
             const notchBottomY = y0 + sUD;
             const remainingWoodHeight = woodBottomY - notchBottomY;
-            
-            // Adjust label center based on remaining wood
             const labelCenterY = notchBottomY + (remainingWoodHeight / 2);
             const textX = x0 + dW / 2;
-            
-            // Push red width line slightly above labels, but below notch
             const widthLineY = notchBottomY + 8;
             const widthTextY = widthLineY + 15;
 
@@ -243,7 +251,6 @@
                     <marker id="m-e-${svgId}" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#000"/></marker>
                 </defs>
                 <path d="${path}" fill="${showWood ? '#dec19e' : 'none'}" stroke="#000" stroke-width="2" />
-                
                 <text x="${textX}" y="${labelCenterY + 10}" text-anchor="middle" font-weight="900" font-size="14" class="uppercase fill-slate-900">${data.label}</text>
                 <text x="${textX}" y="${labelCenterY + 24}" text-anchor="middle" font-weight="bold" font-size="12" fill="#2563eb">QTY: ${data.qty}</text>
                 <text x="${textX}" y="${labelCenterY + 38}" text-anchor="middle" font-weight="bold" font-size="12" fill="#1e40af">H: ${h.toFixed(3)}</text>
@@ -306,7 +313,6 @@
             const printList = document.getElementById('print-items');
             list.innerHTML = ''; printList.innerHTML = '';
             queue.forEach((item, index) => {
-                const deduction = getDeduction(item.t);
                 const row = document.createElement('div');
                 row.className = "flex justify-between items-center p-3 bg-slate-50 rounded border text-sm shadow-sm";
                 row.innerHTML = `<b>${index+1}. ${item.label} (${item.mode.toUpperCase()})</b> <button onclick="removeItem(${item.id})" class="text-red-600 font-bold uppercase text-[10px] hover:underline">Delete</button>`;
