@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V8.8</title>
+    <title>DBS Production Manager V8.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,7 +34,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Logic: Actual Cut Dimensions</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Logic: Synced Deductions</p>
                 </div>
             </div>
             <div class="bg-slate-100 p-1 rounded-full border flex gap-1 h-fit">
@@ -92,7 +92,6 @@
                             <svg viewBox="0 0 500 400" width="300" height="240">
                                 <path d="M 100 100 L 200 100 L 200 150 L 300 150 L 300 100 L 400 100 L 400 300 L 100 300 Z" fill="#dec19e" stroke="#000" stroke-width="2" />
                             </svg>
-                            <p class="text-[10px] font-bold uppercase tracking-widest">Awaiting complete box dimensions</p>
                         </div>
                         <svg id="preview-svg" viewBox="0 0 500 400" class="w-full h-auto max-h-full"></svg>
                     </div>
@@ -173,12 +172,12 @@
             const h = parseFloat(data.height);
             const deduction = getDeduction(t);
 
-            // ACTUAL SIDE LENGTH CALCULATION
             const sideLen = itemMode === 'dovetail' ? d - deduction : d;
             const backWidth = itemMode === 'dovetail' ? w : w - (2*t);
             
             const udRaw = parseFloat(data.uDepth) || 0;
-            const udDisplay = udRaw + t; 
+            // NEW SYNCED LOGIC: Notch depth now includes the same deduction factor as the sides
+            const udDisplay = itemMode === 'dovetail' ? (udRaw + t - deduction) : (udRaw + t);
             
             const laVal = parseFloat(data.lArm);
             const raVal = parseFloat(data.rArm);
@@ -190,7 +189,7 @@
             const dD = d * scale; 
             const dLA = laVal * scale; 
             const dRA = raVal * scale;
-            const dUD = (udRaw + t) * scale;
+            const dUD = udDisplay * scale;
             const x0 = (500 - dW) / 2; const y0 = (400 - dD) / 2;
 
             const path = `M ${x0} ${y0} L ${x0+dLA} ${y0} L ${x0+dLA} ${y0+dUD} L ${x0+dW-dRA} ${y0+dUD} L ${x0+dW-dRA} ${y0} L ${x0+dW} ${y0} L ${x0+dW} ${y0+dD} L ${x0} ${y0+dD} Z`;
@@ -288,7 +287,7 @@
         }
 
         function removeItem(id) { queue = queue.filter(i => i.id !== id); renderQueue(); }
-        function clearQueue() { if(confirm("Clear current queue?")) { queue = []; renderQueue(); } }
+        function clearQueue() { if(confirm("Clear queue?")) { queue = []; renderQueue(); } }
         window.onload = validateInput;
     </script>
 </body>
