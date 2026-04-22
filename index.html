@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V9.0 - Final Sync</title>
+    <title>DBS Production Manager V9.1</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,7 +34,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Logic: Final Synced Math</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.1 - Precision Rounding</p>
                 </div>
             </div>
             <div class="bg-slate-100 p-1 rounded-full border flex gap-1 h-fit">
@@ -56,7 +56,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest border-b pb-2">Entry Form</h2>
                     <div id="entry-form" class="flex flex-col gap-4">
-                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. 2-A" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. Unit 1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Thickness</label>
                             <select id="thick" onchange="validateInput()">
@@ -66,14 +66,14 @@
                                 <option value="0.750">3/4" (0.750)</option>
                             </select>
                         </div>
-                        <div class="input-group"><label>Box Width (W)*</label><input type="number" id="width" placeholder="0.000" oninput="validateInput()"></div>
-                        <div class="input-group"><label>Box Depth (D)*</label><input type="number" id="depth" placeholder="0.000" oninput="validateInput()"></div>
-                        <div class="input-group"><label>Box Height (H)*</label><input type="number" id="height" placeholder="0.000" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Box Width (W)*</label><input type="number" id="width" placeholder="0.000" step="0.001" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Box Depth (D)*</label><input type="number" id="depth" placeholder="0.000" step="0.001" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Box Height (H)*</label><input type="number" id="height" placeholder="0.000" step="0.001" oninput="validateInput()"></div>
                         <div class="border-t pt-4">
-                            <div class="input-group"><label>U-Shape Pocket Depth*</label><input type="number" id="uDepth" placeholder="0.000" oninput="validateInput()"></div>
+                            <div class="input-group"><label>U-Shape Pocket Depth*</label><input type="number" id="uDepth" placeholder="0.000" step="0.001" oninput="validateInput()"></div>
                             <div class="grid grid-cols-2 gap-3 mt-4">
-                                <div class="input-group"><label>Left Arm*</label><input type="number" id="lArm" placeholder="0.000" oninput="validateInput()"></div>
-                                <div class="input-group"><label>Right Arm*</label><input type="number" id="rArm" placeholder="0.000" oninput="validateInput()"></div>
+                                <div class="input-group"><label>Left Arm*</label><input type="number" id="lArm" placeholder="0.000" step="0.001" oninput="validateInput()"></div>
+                                <div class="input-group"><label>Right Arm*</label><input type="number" id="rArm" placeholder="0.000" step="0.001" oninput="validateInput()"></div>
                             </div>
                         </div>
                         <div class="flex flex-col gap-2 mt-4">
@@ -87,8 +87,8 @@
             <div class="lg:col-span-9 space-y-6">
                 <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
                     <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
-                    <div id="display-frame" class="w-full h-[450px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden">
-                        <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale text-center p-4">
+                    <div id="display-frame" class="w-full h-[450px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden text-center">
+                        <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale">
                             <svg viewBox="0 0 500 400" width="300" height="240">
                                 <path d="M 100 100 L 200 100 L 200 150 L 300 150 L 300 100 L 400 100 L 400 300 L 100 300 Z" fill="#dec19e" stroke="#000" stroke-width="2" />
                             </svg>
@@ -176,7 +176,7 @@
             const backWidth = itemMode === 'dovetail' ? w : w - (2*t);
             
             const udRaw = parseFloat(data.uDepth) || 0;
-            // SYNCED MATH: Pocket depth uses (Thickness - Deduction) logic for Dovetail
+            // SYNCED MATH: Pocket depth logic for Dovetail
             const udDisplay = itemMode === 'dovetail' ? (udRaw + t - deduction) : (udRaw + t);
             
             const laVal = parseFloat(data.lArm);
@@ -284,7 +284,7 @@
         }
 
         function removeItem(id) { queue = queue.filter(i => i.id !== id); renderQueue(); }
-        function clearQueue() { if(confirm("Clear queue?")) { queue = []; renderQueue(); } }
+        function clearQueue() { if(confirm("Clear order?")) { queue = []; renderQueue(); } }
         window.onload = validateInput;
     </script>
 </body>
