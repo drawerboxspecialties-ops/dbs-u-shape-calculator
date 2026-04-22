@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V9.8</title>
+    <title>DBS Production Manager V9.9 - Max Scale</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -17,16 +17,19 @@
         .is-live #preview-svg { display: block; }
         .is-live #static-reference { display: none; }
         @media print {
-            @page { size: landscape; margin: 5mm; }
+            @page { size: landscape; margin: 3mm; }
             .no-print { display: none !important; }
             .print-area { display: block !important; width: 100%; }
-            #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+            #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
             
-            /* PRINT BOX & DIAGRAM SIZE OPTIMIZATIONS (V9.8) */
-            .item-container { border: 2px solid #000; padding: 10px; height: 46vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; }
+            /* V9.9 MAX SCALE OPTIMIZATION */
+            .item-container { border: 3px solid #000; padding: 5px; height: 48vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
             
-            /* Increased Diagram Size from 70% to 85% */
-            svg { max-height: 85%; width: auto; }
+            /* Diagram now takes up 95% of the box height */
+            svg { height: 95% !important; width: 100% !important; max-height: none !important; }
+            
+            .print-header { width: 100%; border-bottom: 2px solid #000; margin-bottom: 2px; padding: 2px; font-size: 14px; font-weight: 900; display: flex; justify-content: space-between; }
+            .print-sub { font-size: 11px; font-weight: bold; margin-bottom: 2px; }
         }
     </style>
 </head>
@@ -38,7 +41,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.8 - Larger Print Diagram</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.9 - Max Blueprint Scale</p>
                 </div>
             </div>
             <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
@@ -304,12 +307,12 @@
                 const container = document.createElement('div');
                 container.className = "item-container";
                 container.innerHTML = `
-                    <div class="w-full flex justify-between border-b-2 border-black font-black uppercase text-sm mb-1 pb-1">
+                    <div class="print-header">
                         <span>#${index+1} ${item.label} (${item.mode.toUpperCase()})</span>
-                        <span class="${item.mode === 'dovetail' ? 'text-orange-800' : 'text-blue-800'}">QTY: ${item.qty}</span>
+                        <span style="color: #000;">QTY: ${item.qty}</span>
                     </div>
-                    <div class="w-full flex justify-center gap-4 border-b border-slate-300 font-bold text-[11px] mb-2 pb-1 tracking-widest text-slate-600 uppercase">
-                        <span>W: ${item.width}</span> <span>D: ${item.depth}</span> <span>H: ${item.height}</span> <span>SIDE LEN: ${sideCalculated.toFixed(3)}</span>
+                    <div class="print-sub">
+                        W: ${item.width} | D: ${item.depth} | H: ${item.height} | SIDE: ${sideCalculated.toFixed(3)}
                     </div>
                     <svg id="svg-p-${item.id}" viewBox="0 0 500 400"></svg>`;
                 printList.appendChild(container);
@@ -318,7 +321,7 @@
         }
 
         function removeItem(id) { queue = queue.filter(i => i.id !== id); renderQueue(); }
-        function clearQueue() { if(confirm("Clear current queue?")) { queue = []; renderQueue(); } }
+        function clearQueue() { if(confirm("Clear order?")) { queue = []; renderQueue(); } }
         window.onload = validateInput;
     </script>
 </body>
