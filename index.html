@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V9.9 - Max Scale</title>
+    <title>DBS Production Manager V10.0 - Max Blueprint</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -22,14 +22,16 @@
             .print-area { display: block !important; width: 100%; }
             #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
             
-            /* V9.9 MAX SCALE OPTIMIZATION */
-            .item-container { border: 3px solid #000; padding: 5px; height: 48vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
+            /* V10.0 MAX SCALE & CLEANUP OPTIMIZATION */
+            .item-container { border: 3px solid #000; padding: 2px; height: 48vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; }
             
-            /* Diagram now takes up 95% of the box height */
-            svg { height: 95% !important; width: 100% !important; max-height: none !important; }
+            /* Diagram expanded to 98% of height */
+            svg { height: 98% !important; width: 100% !important; max-height: none !important; }
             
-            .print-header { width: 100%; border-bottom: 2px solid #000; margin-bottom: 2px; padding: 2px; font-size: 14px; font-weight: 900; display: flex; justify-content: space-between; }
-            .print-sub { font-size: 11px; font-weight: bold; margin-bottom: 2px; }
+            .print-header { width: 100%; border-bottom: 2px solid #000; margin-bottom: 1px; padding: 2px; font-size: 14px; font-weight: 900; display: flex; justify-content: space-between; }
+            
+            /* Cleaned up print sub (Removed SIDE LEN:) */
+            .print-sub { font-size: 11px; font-weight: bold; margin-bottom: 1px; }
         }
     </style>
 </head>
@@ -41,7 +43,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.9 - Max Blueprint Scale</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V10.0 - Maximum Blueprint Visibility</p>
                 </div>
             </div>
             <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
@@ -298,7 +300,6 @@
             list.innerHTML = ''; printList.innerHTML = '';
             queue.forEach((item, index) => {
                 const deduction = getDeduction(item.t);
-                const sideCalculated = item.mode === 'dovetail' ? item.depth - deduction : item.depth;
                 const row = document.createElement('div');
                 const accent = item.mode === 'dovetail' ? 'text-orange-600' : 'text-blue-600';
                 row.className = "flex justify-between items-center p-3 bg-slate-50 rounded border text-sm shadow-sm";
@@ -312,7 +313,7 @@
                         <span style="color: #000;">QTY: ${item.qty}</span>
                     </div>
                     <div class="print-sub">
-                        W: ${item.width} | D: ${item.depth} | H: ${item.height} | SIDE: ${sideCalculated.toFixed(3)}
+                        W: ${item.width} | D: ${item.depth} | H: ${item.height}
                     </div>
                     <svg id="svg-p-${item.id}" viewBox="0 0 500 400"></svg>`;
                 printList.appendChild(container);
@@ -321,7 +322,7 @@
         }
 
         function removeItem(id) { queue = queue.filter(i => i.id !== id); renderQueue(); }
-        function clearQueue() { if(confirm("Clear order?")) { queue = []; renderQueue(); } }
+        function clearQueue() { if(confirm("Clear queue?")) { queue = []; renderQueue(); } }
         window.onload = validateInput;
     </script>
 </body>
