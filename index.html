@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V8.6 - Dovetail Full Width</title>
+    <title>DBS Production Manager V8.7</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,7 +34,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Logic: Edge-to-Edge</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Math Correction</p>
                 </div>
             </div>
             <div class="bg-slate-100 p-1 rounded-full border flex gap-1 h-fit">
@@ -56,14 +56,14 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest border-b pb-2">Entry Form</h2>
                     <div id="entry-form" class="flex flex-col gap-4">
-                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. Unit 101" oninput="validateInput()"></div>
-                        <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="Enter Qty" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. 2-A" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Thickness</label>
                             <select id="thick" onchange="validateInput()">
-                                <option value="0.500">1/2" (0.500)</option>
                                 <option value="0.625">5/8" (0.625)</option>
-                                <option value="0.750">3/4" (0.750)</option>
+                                <option value="0.500">1/2" (0.500)</option>
                                 <option value="0.472">12mm (0.472)</option>
+                                <option value="0.750">3/4" (0.750)</option>
                             </select>
                         </div>
                         <div class="input-group"><label>Box Width (W)*</label><input type="number" id="width" placeholder="0.000" oninput="validateInput()"></div>
@@ -86,7 +86,7 @@
 
             <div class="lg:col-span-9 space-y-6">
                 <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
-                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Edge-to-Edge Blueprint</h2>
+                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
                     <div id="display-frame" class="w-full h-[450px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden">
                         <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale">
                             <svg viewBox="0 0 500 400" width="400" height="300">
@@ -167,25 +167,25 @@
         function generateSVG(data, svgId, showWood, itemMode) {
             const svg = document.getElementById(svgId);
             const t = parseFloat(data.t); 
-            const w = parseFloat(data.w); 
+            const w = parseFloat(data.width); 
             const d = parseFloat(data.depth); 
             const h = parseFloat(data.height);
             const deduction = getDeduction(t);
 
-            const sideLen = itemMode === 'dovetail' ? d - deduction : d;
-            const backWidth = itemMode === 'dovetail' ? w : w - (2*t);
+            // Back panel width logic: Dovetail = Full Width, Dowel = W - 2t
+            const displayWidth = itemMode === 'dovetail' ? w : w - (2*t);
             
-            const udRaw = parseFloat(data.ud) || 0;
-            const udFinal = itemMode === 'dovetail' ? udRaw + (t - deduction) + t : udRaw + t;
+            const udRaw = parseFloat(data.uDepth) || 0;
+            const udDisplay = udRaw + t; // Visual arrow shows depth + thickness
             
-            // DOVETAIL EDGE-TO-EDGE LOGIC
             const laVal = parseFloat(data.lArm);
             const raVal = parseFloat(data.rArm);
             const gap = w - (laVal + raVal);
             
             const margin = 85;
             const scale = Math.min((500-margin*2)/w, (400-margin*2)/d);
-            const dW = w * scale; const dD = d * scale; 
+            const dW = w * scale; 
+            const dD = d * scale; 
             const dLA = laVal * scale; 
             const dRA = raVal * scale;
             const dUD = (udRaw + t) * scale;
@@ -199,7 +199,7 @@
                     <marker id="m-e-${svgId}" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#000"/></marker>
                 </defs>
                 <path d="${path}" fill="${showWood ? '#dec19e' : 'none'}" stroke="#000" stroke-width="2" />
-                <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 - 15}" text-anchor="middle" font-weight="900" font-size="16" class="uppercase">${data.label}</text>
+                <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 - 15}" text-anchor="middle" font-weight="900" font-size="16" class="uppercase fill-slate-900">${data.label}</text>
                 <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 + 5}" text-anchor="middle" font-weight="bold" font-size="14" fill="#2563eb">QTY: ${data.qty}</text>
                 <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 + 25}" text-anchor="middle" font-weight="bold" font-size="14" fill="#1e40af">H: ${h.toFixed(3)}</text>
                 
@@ -207,7 +207,7 @@
                 <text x="${x0-50}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="14" transform="rotate(-90, ${x0-50}, ${y0+dD/2})">${d.toFixed(3)}</text>
                 
                 <line x1="${x0}" y1="${y0+dD+25}" x2="${x0+dW}" y2="${y0+dD+25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dW/2}" y="${y0+dD+45}" text-anchor="middle" font-weight="900" font-size="20" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${backWidth.toFixed(3)}</text>
+                <text x="${x0+dW/2}" y="${y0+dD+45}" text-anchor="middle" font-weight="900" font-size="20" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${displayWidth.toFixed(3)}</text>
                 
                 <line x1="${x0}" y1="${y0-25}" x2="${x0+dLA}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0+dLA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${laVal.toFixed(3)}</text>
@@ -216,7 +216,7 @@
                 <text x="${x0+dW-dRA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${raVal.toFixed(3)}</text>
                 
                 <line x1="${x0+dLA+12}" y1="${y0}" x2="${x0+dLA+12}" y2="${y0+dUD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dLA+18}" y="${y0+dUD/2}" text-anchor="start" font-size="14" font-weight="bold" fill="red">${(udRaw + t).toFixed(3)}</text>
+                <text x="${x0+dLA+18}" y="${y0+dUD/2}" text-anchor="start" font-size="14" font-weight="bold" fill="red">${udDisplay.toFixed(3)}</text>
                 
                 <line x1="${x0+dLA}" y1="${y0+dUD+20}" x2="${x0+dW-dRA}" y2="${y0+dUD+20}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0+dLA+(gap*scale)/2}" y="${y0+dUD+45}" text-anchor="middle" font-weight="bold" fill="red" font-size="18">${gap.toFixed(3)}</text>
@@ -230,12 +230,12 @@
                 label: document.getElementById('label').value || "Unit",
                 qty: document.getElementById('qty').value,
                 t: parseFloat(document.getElementById('thick').value),
-                w: parseFloat(document.getElementById('width').value),
-                depth: parseFloat(document.getElementById('depth').value),
-                height: parseFloat(document.getElementById('height').value),
-                ud: parseFloat(document.getElementById('uDepth').value),
-                lArm: parseFloat(document.getElementById('lArm').value),
-                rArm: parseFloat(document.getElementById('rArm').value)
+                width: document.getElementById('width').value,
+                depth: document.getElementById('depth').value,
+                height: document.getElementById('height').value,
+                uDepth: document.getElementById('uDepth').value,
+                lArm: document.getElementById('lArm').value,
+                rArm: document.getElementById('rArm').value
             };
             generateSVG(data, 'preview-svg', true, currentMode);
         }
@@ -247,12 +247,12 @@
                 label: document.getElementById('label').value || 'Unit',
                 qty: document.getElementById('qty').value,
                 t: parseFloat(sel.value), tName: sel.options[sel.selectedIndex].text,
-                w: parseFloat(document.getElementById('width').value),
-                depth: parseFloat(document.getElementById('depth').value),
-                height: parseFloat(document.getElementById('height').value),
-                ud: parseFloat(document.getElementById('uDepth').value),
-                lArm: parseFloat(document.getElementById('lArm').value),
-                rArm: parseFloat(document.getElementById('rArm').value)
+                width: document.getElementById('width').value,
+                depth: document.getElementById('depth').value,
+                height: document.getElementById('height').value,
+                uDepth: document.getElementById('uDepth').value,
+                lArm: document.getElementById('lArm').value,
+                rArm: document.getElementById('rArm').value
             };
             queue.push(item); renderQueue();
         }
@@ -277,7 +277,7 @@
                         <span class="${item.mode === 'dovetail' ? 'text-orange-800' : 'text-blue-800'}">QTY: ${item.qty}</span>
                     </div>
                     <div class="w-full flex justify-center gap-4 border-b border-slate-300 font-bold text-[11px] mb-2 pb-1 tracking-widest text-slate-600 uppercase">
-                        <span>W: ${item.w}</span> <span>D: ${item.depth}</span> <span>H: ${item.height}</span> <span>SIDE LEN: ${sideCalculated.toFixed(3)}</span>
+                        <span>W: ${item.width}</span> <span>D: ${item.depth}</span> <span>H: ${item.height}</span> <span>SIDE LEN: ${sideCalculated.toFixed(3)}</span>
                     </div>
                     <svg id="svg-p-${item.id}" viewBox="0 0 500 400"></svg>`;
                 printList.appendChild(container);
