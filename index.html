@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V8.7</title>
+    <title>DBS Production Manager V8.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,7 +34,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Math Correction</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">Dovetail Logic: Actual Cut Dimensions</p>
                 </div>
             </div>
             <div class="bg-slate-100 p-1 rounded-full border flex gap-1 h-fit">
@@ -56,12 +56,12 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest border-b pb-2">Entry Form</h2>
                     <div id="entry-form" class="flex flex-col gap-4">
-                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. 2-A" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. a" oninput="validateInput()"></div>
                         <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Thickness</label>
                             <select id="thick" onchange="validateInput()">
-                                <option value="0.625">5/8" (0.625)</option>
                                 <option value="0.500">1/2" (0.500)</option>
+                                <option value="0.625">5/8" (0.625)</option>
                                 <option value="0.472">12mm (0.472)</option>
                                 <option value="0.750">3/4" (0.750)</option>
                             </select>
@@ -86,12 +86,13 @@
 
             <div class="lg:col-span-9 space-y-6">
                 <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
-                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
+                    <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Edge-to-Edge Blueprint</h2>
                     <div id="display-frame" class="w-full h-[450px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden">
-                        <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale">
-                            <svg viewBox="0 0 500 400" width="400" height="300">
+                        <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale text-center p-4">
+                            <svg viewBox="0 0 500 400" width="300" height="240">
                                 <path d="M 100 100 L 200 100 L 200 150 L 300 150 L 300 100 L 400 100 L 400 300 L 100 300 Z" fill="#dec19e" stroke="#000" stroke-width="2" />
                             </svg>
+                            <p class="text-[10px] font-bold uppercase tracking-widest">Awaiting complete box dimensions</p>
                         </div>
                         <svg id="preview-svg" viewBox="0 0 500 400" class="w-full h-auto max-h-full"></svg>
                     </div>
@@ -172,11 +173,12 @@
             const h = parseFloat(data.height);
             const deduction = getDeduction(t);
 
-            // Back panel width logic: Dovetail = Full Width, Dowel = W - 2t
-            const displayWidth = itemMode === 'dovetail' ? w : w - (2*t);
+            // ACTUAL SIDE LENGTH CALCULATION
+            const sideLen = itemMode === 'dovetail' ? d - deduction : d;
+            const backWidth = itemMode === 'dovetail' ? w : w - (2*t);
             
             const udRaw = parseFloat(data.uDepth) || 0;
-            const udDisplay = udRaw + t; // Visual arrow shows depth + thickness
+            const udDisplay = udRaw + t; 
             
             const laVal = parseFloat(data.lArm);
             const raVal = parseFloat(data.rArm);
@@ -204,10 +206,10 @@
                 <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 + 25}" text-anchor="middle" font-weight="bold" font-size="14" fill="#1e40af">H: ${h.toFixed(3)}</text>
                 
                 <line x1="${x0-35}" y1="${y0}" x2="${x0-35}" y2="${y0+dD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0-50}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="14" transform="rotate(-90, ${x0-50}, ${y0+dD/2})">${d.toFixed(3)}</text>
+                <text x="${x0-50}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="16" fill="${itemMode==='dovetail'?'#c026d3':'#000'}" transform="rotate(-90, ${x0-50}, ${y0+dD/2})">${sideLen.toFixed(3)}</text>
                 
                 <line x1="${x0}" y1="${y0+dD+25}" x2="${x0+dW}" y2="${y0+dD+25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dW/2}" y="${y0+dD+45}" text-anchor="middle" font-weight="900" font-size="20" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${displayWidth.toFixed(3)}</text>
+                <text x="${x0+dW/2}" y="${y0+dD+45}" text-anchor="middle" font-weight="900" font-size="20" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${backWidth.toFixed(3)}</text>
                 
                 <line x1="${x0}" y1="${y0-25}" x2="${x0+dLA}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0+dLA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${laVal.toFixed(3)}</text>
@@ -286,7 +288,7 @@
         }
 
         function removeItem(id) { queue = queue.filter(i => i.id !== id); renderQueue(); }
-        function clearQueue() { if(confirm("Clear order?")) { queue = []; renderQueue(); } }
+        function clearQueue() { if(confirm("Clear current queue?")) { queue = []; renderQueue(); } }
         window.onload = validateInput;
     </script>
 </body>
