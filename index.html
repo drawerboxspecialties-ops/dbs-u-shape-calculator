@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V9.7.1</title>
+    <title>DBS Production Manager V9.8</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -21,8 +21,12 @@
             .no-print { display: none !important; }
             .print-area { display: block !important; width: 100%; }
             #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-            .item-container { border: 2px solid #000; padding: 15px; height: 46vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; }
-            svg { max-height: 70%; width: auto; }
+            
+            /* PRINT BOX & DIAGRAM SIZE OPTIMIZATIONS (V9.8) */
+            .item-container { border: 2px solid #000; padding: 10px; height: 46vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; }
+            
+            /* Increased Diagram Size from 70% to 85% */
+            svg { max-height: 85%; width: auto; }
         }
     </style>
 </head>
@@ -34,7 +38,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.7.1 - Sidebar Integration</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.8 - Larger Print Diagram</p>
                 </div>
             </div>
             <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
@@ -54,7 +58,6 @@
             <div class="lg:col-span-3">
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2">Construction Mode</h2>
-                    
                     <div class="bg-slate-100 p-1 rounded-lg border flex gap-1 mb-6 shadow-inner">
                         <button id="btn-dovetail" onclick="setMode('dovetail')" class="flex-1 py-2 rounded-md text-[10px] font-black uppercase transition-all bg-orange-600 text-white shadow-sm">Dovetail</button>
                         <button id="btn-dowel" onclick="setMode('dowel')" class="flex-1 py-2 rounded-md text-[10px] font-black uppercase transition-all text-slate-500 hover:text-slate-700">Dowel</button>
@@ -315,7 +318,7 @@
         }
 
         function removeItem(id) { queue = queue.filter(i => i.id !== id); renderQueue(); }
-        function clearQueue() { if(confirm("Clear queue?")) { queue = []; renderQueue(); } }
+        function clearQueue() { if(confirm("Clear current queue?")) { queue = []; renderQueue(); } }
         window.onload = validateInput;
     </script>
 </body>
