@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V9.3</title>
+    <title>DBS Production Manager V9.4 - Strict Mode Separation</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,7 +34,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.3 - Overlap Overhaul</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.4 - Strict Dowel Recovery</p>
                 </div>
             </div>
             <div class="bg-slate-100 p-1 rounded-full border flex gap-1 h-fit">
@@ -56,7 +56,7 @@
                 <div class="bg-white p-6 rounded-xl shadow-sm border border-slate-200">
                     <h2 class="text-[10px] font-black text-slate-400 uppercase mb-6 tracking-widest border-b pb-2">Entry Form</h2>
                     <div id="entry-form" class="flex flex-col gap-4">
-                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. 2-A" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. Unit 1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Thickness</label>
                             <select id="thick" onchange="validateInput()">
@@ -172,33 +172,38 @@
             const h = parseFloat(data.height);
             const deduction = getDeduction(t);
 
-            const sideLen = itemMode === 'dovetail' ? d - deduction : d;
-            const backWidth = itemMode === 'dovetail' ? w : w - (2*t);
-            
-            const udRaw = parseFloat(data.uDepth) || 0;
-            const udDisplay = itemMode === 'dovetail' ? (udRaw + t - deduction) : (udRaw + t);
-            
+            // STRICT MODE SEPARATION
+            let sideLen, backWidth, udDisplay, dLA, dRA;
             const laVal = parseFloat(data.lArm);
             const raVal = parseFloat(data.rArm);
+            const udRaw = parseFloat(data.uDepth) || 0;
+
+            if (itemMode === 'dovetail') {
+                sideLen = d - deduction;
+                backWidth = w;
+                udDisplay = udRaw + t - deduction;
+                dLA = laVal;
+                dRA = raVal;
+            } else {
+                // DOWEL MODE RECOVERY: Full D sides, Trapped back, Inner Arms
+                sideLen = d;
+                backWidth = w - (2*t);
+                udDisplay = udRaw + t;
+                dLA = laVal - (2*t);
+                dRA = raVal - (2*t);
+            }
+
             const gap = w - (laVal + raVal);
-            
             const margin = 85;
             const scale = Math.min((500-margin*2)/w, (400-margin*2)/d);
             const dW = w * scale; const dD = d * scale; 
-            const dLA = laVal * scale; const dRA = raVal * scale;
-            const dUD = udDisplay * scale;
+            const sLA = dLA * scale; const sRA = dRA * scale;
+            const sUD = udDisplay * scale;
             const x0 = (500 - dW) / 2; const y0 = (400 - dD) / 2;
 
-            const path = `M ${x0} ${y0} L ${x0+dLA} ${y0} L ${x0+dLA} ${y0+dUD} L ${x0+dW-dRA} ${y0+dUD} L ${x0+dW-dRA} ${y0} L ${x0+dW} ${y0} L ${x0+dW} ${y0+dD} L ${x0} ${y0+dD} Z`;
+            const path = `M ${x0} ${y0} L ${x0+sLA} ${y0} L ${x0+sLA} ${y0+sUD} L ${x0+dW-sRA} ${y0+sUD} L ${x0+dW-sRA} ${y0} L ${x0+dW} ${y0} L ${x0+dW} ${y0+dD} L ${x0} ${y0+dD} Z`;
 
-            // IMPROVED OVERLAP CALCULATION:
-            // Find the visual bottom half of the board (area below the notch)
-            const notchBottomY = y0 + dUD;
-            const boardBottomY = y0 + dD;
-            const woodRemainingHeight = boardBottomY - notchBottomY;
-            
-            // Safe anchor point is the middle of the solid wood area
-            const safeY = notchBottomY + (woodRemainingHeight / 2);
+            const panelCenterY = y0 + sUD + (dD - sUD) / 2;
             const textX = x0 + dW / 2;
 
             svg.innerHTML = `
@@ -208,9 +213,9 @@
                 </defs>
                 <path d="${path}" fill="${showWood ? '#dec19e' : 'none'}" stroke="#000" stroke-width="2" />
                 
-                <text x="${textX}" y="${safeY - 14}" text-anchor="middle" font-weight="900" font-size="14" class="uppercase fill-slate-900">${data.label}</text>
-                <text x="${textX}" y="${safeY + 2}" text-anchor="middle" font-weight="bold" font-size="12" fill="#2563eb">QTY: ${data.qty}</text>
-                <text x="${textX}" y="${safeY + 16}" text-anchor="middle" font-weight="bold" font-size="12" fill="#1e40af">H: ${h.toFixed(3)}</text>
+                <text x="${textX}" y="${panelCenterY - 14}" text-anchor="middle" font-weight="900" font-size="14" class="uppercase fill-slate-900">${data.label}</text>
+                <text x="${textX}" y="${panelCenterY + 2}" text-anchor="middle" font-weight="bold" font-size="12" fill="#2563eb">QTY: ${data.qty}</text>
+                <text x="${textX}" y="${panelCenterY + 16}" text-anchor="middle" font-weight="bold" font-size="12" fill="#1e40af">H: ${h.toFixed(3)}</text>
                 
                 <line x1="${x0-35}" y1="${y0}" x2="${x0-35}" y2="${y0+dD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0-50}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="16" fill="${itemMode==='dovetail'?'#c026d3':'#000'}" transform="rotate(-90, ${x0-50}, ${y0+dD/2})">${sideLen.toFixed(3)}</text>
@@ -218,16 +223,16 @@
                 <line x1="${x0}" y1="${y0+dD+25}" x2="${x0+dW}" y2="${y0+dD+25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0+dW/2}" y="${y0+dD+45}" text-anchor="middle" font-weight="900" font-size="20" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${backWidth.toFixed(3)}</text>
                 
-                <line x1="${x0}" y1="${y0-25}" x2="${x0+dLA}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dLA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${laVal.toFixed(3)}</text>
-                <line x1="${x0+dW-dRA}" y1="${y0-25}" x2="${x0+dW}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dW-dRA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${raVal.toFixed(3)}</text>
+                <line x1="${x0}" y1="${y0-25}" x2="${x0+sLA}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
+                <text x="${x0+sLA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${dLA.toFixed(3)}</text>
+                <line x1="${x0+dW-sRA}" y1="${y0-25}" x2="${x0+dW}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
+                <text x="${x0+dW-sRA/2}" y="${y0-35}" text-anchor="middle" font-size="14" font-weight="bold">${dRA.toFixed(3)}</text>
                 
-                <line x1="${x0+dLA+12}" y1="${y0}" x2="${x0+dLA+12}" y2="${y0+dUD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dLA+18}" y="${y0+dUD/2}" text-anchor="start" font-size="14" font-weight="bold" fill="red">${udDisplay.toFixed(3)}</text>
+                <line x1="${x0+sLA+12}" y1="${y0}" x2="${x0+sLA+12}" y2="${y0+sUD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
+                <text x="${x0+sLA+18}" y="${y0+sUD/2}" text-anchor="start" font-size="14" font-weight="bold" fill="red">${udDisplay.toFixed(3)}</text>
                 
-                <line x1="${x0+dLA}" y1="${y0+dUD+15}" x2="${x0+dW-dRA}" y2="${y0+dUD+15}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dLA+(gap*scale)/2}" y="${y0+dUD+32}" text-anchor="middle" font-weight="bold" fill="red" font-size="18">${gap.toFixed(3)}</text>
+                <line x1="${x0+sLA}" y1="${y0+sUD+15}" x2="${x0+dW-sRA}" y2="${y0+sUD+15}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
+                <text x="${x0+sLA+(gap*scale)/2}" y="${y0+sUD+32}" text-anchor="middle" font-weight="bold" fill="red" font-size="18">${gap.toFixed(3)}</text>
                 
                 <text x="${x0+dW}" y="${y0+dD-5}" text-anchor="end" font-size="10" font-weight="bold">T = ${t.toFixed(3)}</text>
             `;
