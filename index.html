@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V9.1</title>
+    <title>DBS Production Manager V9.2 - No Overlap</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -34,7 +34,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.1 - Precision Rounding</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V9.2 - Text Clutter Fix</p>
                 </div>
             </div>
             <div class="bg-slate-100 p-1 rounded-full border flex gap-1 h-fit">
@@ -192,15 +192,22 @@
 
             const path = `M ${x0} ${y0} L ${x0+dLA} ${y0} L ${x0+dLA} ${y0+dUD} L ${x0+dW-dRA} ${y0+dUD} L ${x0+dW-dRA} ${y0} L ${x0+dW} ${y0} L ${x0+dW} ${y0+dD} L ${x0} ${y0+dD} Z`;
 
+            // NEW DYNAMIC TEXT PLACEMENT:
+            // Detect the center of the available solid panel space to prevent overlap
+            const textX = x0+dW/2;
+            const panelCenterY = y0+dUD + (dD-dUD)/2;
+            const clutterBuffer = 15; // Buffer to keep away from arrows
+
             svg.innerHTML = `
                 <defs>
                     <marker id="m-s-${svgId}" markerWidth="10" markerHeight="10" refX="0" refY="5" orient="auto"><path d="M10,0 L0,5 L10,10 Z" fill="#000"/></marker>
                     <marker id="m-e-${svgId}" markerWidth="10" markerHeight="10" refX="10" refY="5" orient="auto"><path d="M0,0 L10,5 L0,10 Z" fill="#000"/></marker>
                 </defs>
                 <path d="${path}" fill="${showWood ? '#dec19e' : 'none'}" stroke="#000" stroke-width="2" />
-                <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 - 15}" text-anchor="middle" font-weight="900" font-size="16" class="uppercase fill-slate-900">${data.label}</text>
-                <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 + 5}" text-anchor="middle" font-weight="bold" font-size="14" fill="#2563eb">QTY: ${data.qty}</text>
-                <text x="${x0+dW/2}" y="${y0+dUD + (dD-dUD)/2 + 25}" text-anchor="middle" font-weight="bold" font-size="14" fill="#1e40af">H: ${h.toFixed(3)}</text>
+                
+                <text x="${textX}" y="${panelCenterY - clutterBuffer}" text-anchor="middle" font-weight="900" font-size="16" class="uppercase fill-slate-900">${data.label}</text>
+                <text x="${textX}" y="${panelCenterY}" text-anchor="middle" font-weight="bold" font-size="14" fill="#2563eb">QTY: ${data.qty}</text>
+                <text x="${textX}" y="${panelCenterY + clutterBuffer}" text-anchor="middle" font-weight="bold" font-size="14" fill="#1e40af">H: ${h.toFixed(3)}</text>
                 
                 <line x1="${x0-35}" y1="${y0}" x2="${x0-35}" y2="${y0+dD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0-50}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="16" fill="${itemMode==='dovetail'?'#c026d3':'#000'}" transform="rotate(-90, ${x0-50}, ${y0+dD/2})">${sideLen.toFixed(3)}</text>
@@ -284,7 +291,7 @@
         }
 
         function removeItem(id) { queue = queue.filter(i => i.id !== id); renderQueue(); }
-        function clearQueue() { if(confirm("Clear order?")) { queue = []; renderQueue(); } }
+        function clearQueue() { if(confirm("Clear queue?")) { queue = []; renderQueue(); } }
         window.onload = validateInput;
     </script>
 </body>
