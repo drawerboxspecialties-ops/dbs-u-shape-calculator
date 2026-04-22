@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V10.8 - Final Logic & Font Boost</title>
+    <title>DBS Production Manager V10.9 - No-Overlap Logic</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -39,7 +39,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V10.8 - Dovetail Edge-to-Edge & Large Font</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V10.9 - No-Overlap Smart Labels</p>
                 </div>
             </div>
             <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
@@ -65,7 +65,7 @@
                     </div>
 
                     <div id="entry-form" class="flex flex-col gap-4">
-                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. a" oninput="validateInput()"></div>
+                        <div class="input-group"><label>Line Label</label><input type="text" id="label" placeholder="e.g. Unit 1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Qty*</label><input type="number" id="qty" placeholder="1" oninput="validateInput()"></div>
                         <div class="input-group"><label>Thickness</label>
                             <select id="thick" onchange="validateInput()">
@@ -203,7 +203,6 @@
                 backWidth = w;
                 udDisplay = udRaw + t - deduction;
                 dLA = laVal; dRA = raVal;
-                // V10.8 DOVETAIL LOGIC: Horizontal width = Inside measurement + 2 * Thickness (Edge-to-Edge)
                 notchHorizontalWidth = gap + (2 * t);
             } else {
                 sideLen = d;
@@ -225,10 +224,20 @@
 
             const path = `M ${x0} ${y0} L ${x0+sLA} ${y0} L ${x0+sLA} ${y0+sUD} L ${x0+dW-sRA} ${y0+sUD} L ${x0+dW-sRA} ${y0} L ${x0+dW} ${y0} L ${x0+dW} ${y0+dD} L ${x0} ${y0+dD} Z`;
 
-            const notchCenterY = y0 + (sUD / 2);
+            // V10.9 COLLISION-FREE LABEL PLACEMENT
+            const woodBottomY = y0 + dD;
+            const notchBottomY = y0 + sUD;
+            const remainingWoodHeight = woodBottomY - notchBottomY;
             const textX = x0 + dW / 2;
-            const canFitInNotch = (sUD > 50) && (gap * scale > 100);
-            const labelCenterY = canFitInNotch ? notchCenterY : (y0 + sUD + (dD - sUD) / 2);
+            
+            let labelCenterY;
+            // If the solid wood area is large enough, stay inside the board (no overlap with notch dims)
+            if (remainingWoodHeight > 100) {
+                labelCenterY = notchBottomY + (remainingWoodHeight / 2);
+            } else {
+                // Only use notch area if board is a thin sliver, to avoid crashing into bottom arrow
+                labelCenterY = y0 + (sUD / 2);
+            }
 
             svg.innerHTML = `
                 <defs>
@@ -237,23 +246,23 @@
                 </defs>
                 <path d="${path}" fill="${showWood ? '#dec19e' : 'none'}" stroke="#000" stroke-width="2" />
                 
-                <text x="${textX}" y="${labelCenterY - 14}" text-anchor="middle" font-weight="900" font-size="22" class="uppercase fill-slate-900">${data.label}</text>
-                <text x="${textX}" y="${labelCenterY + 6}" text-anchor="middle" font-weight="bold" font-size="18" fill="#2563eb">QTY: ${data.qty}</text>
-                <text x="${textX}" y="${labelCenterY + 26}" text-anchor="middle" font-weight="bold" font-size="18" fill="#1e40af">H: ${h.toFixed(3)}</text>
+                <text x="${textX}" y="${labelCenterY - 18}" text-anchor="middle" font-weight="900" font-size="24" class="uppercase fill-slate-900">${data.label}</text>
+                <text x="${textX}" y="${labelCenterY + 4}" text-anchor="middle" font-weight="bold" font-size="20" fill="#2563eb">QTY: ${data.qty}</text>
+                <text x="${textX}" y="${labelCenterY + 26}" text-anchor="middle" font-weight="bold" font-size="20" fill="#1e40af">H: ${h.toFixed(3)}</text>
                 
                 <line x1="${x0-35}" y1="${y0}" x2="${x0-35}" y2="${y0+dD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0-60}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="22" fill="${itemMode==='dovetail'?'#c026d3':'#000'}" transform="rotate(-90, ${x0-60}, ${y0+dD/2})">${sideLen.toFixed(3)}</text>
                 
                 <line x1="${x0}" y1="${y0+dD+25}" x2="${x0+dW}" y2="${y0+dD+25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${textX}" y="${y0+dD+52}" text-anchor="middle" font-weight="900" font-size="28" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${backWidth.toFixed(3)}</text>
+                <text x="${textX}" y="${y0+dD+55}" text-anchor="middle" font-weight="900" font-size="30" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${backWidth.toFixed(3)}</text>
                 
                 <line x1="${x0}" y1="${y0-25}" x2="${x0+sLA}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+sLA/2}" y="${y0-35}" text-anchor="middle" font-size="18" font-weight="bold">${dLA.toFixed(3)}</text>
+                <text x="${x0+sLA/2}" y="${y0-35}" text-anchor="middle" font-size="20" font-weight="bold">${dLA.toFixed(3)}</text>
                 <line x1="${x0+dW-sRA}" y1="${y0-25}" x2="${x0+dW}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dW-sRA/2}" y="${y0-35}" text-anchor="middle" font-size="18" font-weight="bold">${dRA.toFixed(3)}</text>
+                <text x="${x0+dW-sRA/2}" y="${y0-35}" text-anchor="middle" font-size="20" font-weight="bold">${dRA.toFixed(3)}</text>
                 
-                <line x1="${x0+sLA+12}" y1="${y0}" x2="${x0+sLA+12}" y2="${y0+sUD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+sLA+22}" y="${y0+(sUD/2)}" text-anchor="start" font-size="18" font-weight="bold" fill="red">${udDisplay.toFixed(3)}</text>
+                <line x1="${x0+sLA+12}" y1="${y0}" x2="${x0+sLA+12}" y2="${notchBottomY}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
+                <text x="${x0+sLA+22}" y="${y0+(sUD/2)}" text-anchor="start" font-size="20" font-weight="bold" fill="red">${udDisplay.toFixed(3)}</text>
                 
                 <line x1="${x0+sLA}" y1="${y0+sUD+10}" x2="${x0+dW-sRA}" y2="${y0+sUD+10}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
                 <text x="${x0+sLA+(gap*scale)/2}" y="${y0+sUD+35}" text-anchor="middle" font-weight="bold" fill="red" font-size="26">${notchHorizontalWidth.toFixed(3)}</text>
