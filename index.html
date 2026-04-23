@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V11.8</title>
+    <title>DBS Production Manager V11.9</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -30,21 +30,23 @@
             
             svg { width: 100% !important; height: 100% !important; max-height: none !important; margin: 0 !important; }
             
-            /* V11.8 AUTO-FIT SINGLE LINE HEADER */
+            /* V11.9 NO-VANISH FLEX HEADER */
             .print-header-single { 
                 width: 100%; 
                 border-bottom: 2px solid #000; 
-                padding: 6px 4px; 
+                padding: 6px 0; 
                 margin-bottom: 8px;
-                font-size: 14px; /* Optimized to fit 10-char label + dimensions on one line */
+                font-size: 13px; /* Slightly smaller base to ensure fit */
                 font-weight: 900; 
                 display: flex;
+                align-items: center;
                 justify-content: space-between;
                 background: #fff;
                 text-transform: uppercase;
-                white-space: nowrap; 
-                overflow: hidden;
+                white-space: nowrap;
             }
+            .header-left { flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-right: 10px; }
+            .header-right { flex-shrink: 0; white-space: nowrap; }
         }
     </style>
 </head>
@@ -56,7 +58,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V11.8 - Restricted Labels & Auto-Fit</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V11.9 - Dynamic Header Protection</p>
                 </div>
             </div>
             <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
@@ -113,7 +115,7 @@
             <div class="lg:col-span-9 space-y-6">
                 <div id="preview-card" class="bg-white rounded-xl shadow-sm border border-slate-200 p-8 flex flex-col items-center">
                     <h2 class="w-full text-[10px] font-black text-slate-400 uppercase mb-4 tracking-widest border-b pb-2 text-left">Blueprint Preview</h2>
-                    <div id="display-frame" class="w-full h-[500px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden text-center">
+                    <div id="display-frame" class="w-full h-[450px] bg-slate-50 rounded-lg flex flex-col items-center justify-center border-2 border-dashed border-slate-200 relative overflow-hidden text-center">
                         <div id="static-reference" class="flex flex-col items-center justify-center opacity-40 grayscale">
                             <svg viewBox="0 0 500 400" width="300" height="240">
                                 <path d="M 100 100 L 200 100 L 200 150 L 300 150 L 300 100 L 400 100 L 400 300 L 100 300 Z" fill="#dec19e" stroke="#000" stroke-width="2" />
@@ -326,8 +328,8 @@
                 
                 container.innerHTML = `
                     <div class="print-header-single">
-                        <span>#${index+1} ${displayMode} - ${item.label}</span>
-                        <span>QTY: ${item.qty} | W: ${item.width} | D: ${item.depth} | H: ${item.height}</span>
+                        <div class="header-left">#${index+1} ${displayMode} - ${item.label}</div>
+                        <div class="header-right">QTY: ${item.qty} | W: ${item.width} | D: ${item.depth} | H: ${item.height}</div>
                     </div>
                     <svg id="svg-p-${item.id}" viewBox="0 0 500 400"></svg>`;
                 printList.appendChild(container);
