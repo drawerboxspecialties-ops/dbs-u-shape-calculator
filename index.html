@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>DBS Production Manager V11.9</title>
+    <title>DBS Production Manager V12.0</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
         *, *::before, *::after { box-sizing: border-box; }
@@ -25,25 +25,12 @@
             .no-print { display: none !important; }
             .print-area { display: block !important; width: 100%; }
             #print-items { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-            
             .item-container { border: 3px solid #000; padding: 12px; height: 46vh; page-break-inside: avoid; display: flex; flex-direction: column; align-items: center; justify-content: flex-start; overflow: hidden; background: #fff; }
-            
             svg { width: 100% !important; height: 100% !important; max-height: none !important; margin: 0 !important; }
-            
-            /* V11.9 NO-VANISH FLEX HEADER */
             .print-header-single { 
-                width: 100%; 
-                border-bottom: 2px solid #000; 
-                padding: 6px 0; 
-                margin-bottom: 8px;
-                font-size: 13px; /* Slightly smaller base to ensure fit */
-                font-weight: 900; 
-                display: flex;
-                align-items: center;
-                justify-content: space-between;
-                background: #fff;
-                text-transform: uppercase;
-                white-space: nowrap;
+                width: 100%; border-bottom: 2px solid #000; padding: 6px 0; margin-bottom: 8px;
+                font-size: 13px; font-weight: 900; display: flex; align-items: center; justify-content: space-between;
+                background: #fff; text-transform: uppercase; white-space: nowrap;
             }
             .header-left { flex-shrink: 1; overflow: hidden; text-overflow: ellipsis; min-width: 0; padding-right: 10px; }
             .header-right { flex-shrink: 0; white-space: nowrap; }
@@ -58,7 +45,7 @@
                 <div class="h-16 w-32 bg-slate-900 rounded flex items-center justify-center p-2 text-white font-black italic text-2xl uppercase">DBS</div>
                 <div>
                     <h1 class="text-2xl font-black text-slate-900 tracking-tighter uppercase leading-none">U-Shape Calculator</h1>
-                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V11.9 - Dynamic Header Protection</p>
+                    <p class="text-xs font-bold text-slate-400 tracking-widest uppercase mt-1">V12.0 - Clean Decimals (No Trailing Zeros)</p>
                 </div>
             </div>
             <div id="status-chip" class="px-4 py-2 bg-orange-50 border border-orange-200 text-orange-700 text-[10px] font-black uppercase rounded-lg tracking-widest">
@@ -137,6 +124,11 @@
     <script>
         let queue = [];
         let currentMode = 'dovetail';
+
+        // V12.0 CLEAN DECIMAL HELPER
+        function fmt(num) {
+            return Number(parseFloat(num).toFixed(3));
+        }
 
         function validateInput() {
             const numericFields = ['qty', 'width', 'depth', 'height', 'uDepth', 'lArm', 'rArm'];
@@ -256,27 +248,27 @@
                 ${!isPrint ? `
                 <text x="15" y="35" text-anchor="start" font-weight="900" font-size="28" class="uppercase fill-slate-900">${data.label}</text>
                 <text x="15" y="62" text-anchor="start" font-weight="bold" font-size="18" fill="#2563eb">QTY: ${data.qty}</text>
-                <text x="15" y="85" text-anchor="start" font-weight="bold" font-size="18" fill="#1e40af">H: ${h.toFixed(3)}</text>
+                <text x="15" y="85" text-anchor="start" font-weight="bold" font-size="18" fill="#1e40af">H: ${fmt(h)}</text>
                 ` : ''}
                 
                 <line x1="${x0-35}" y1="${y0}" x2="${x0-35}" y2="${y0+dD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0-65}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="22" fill="${itemMode==='dovetail'?'#c026d3':'#000'}" transform="rotate(-90, ${x0-65}, ${y0+dD/2})">${sideLen.toFixed(3)}</text>
+                <text x="${x0-65}" y="${y0+dD/2}" text-anchor="middle" font-weight="bold" font-size="22" fill="${itemMode==='dovetail'?'#c026d3':'#000'}" transform="rotate(-90, ${x0-65}, ${y0+dD/2})">${fmt(sideLen)}</text>
                 
                 <line x1="${x0}" y1="${y0+dD+25}" x2="${x0+dW}" y2="${y0+dD+25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dW/2}" y="${y0+dD+55}" text-anchor="middle" font-weight="900" font-size="32" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${backWidth.toFixed(3)}</text>
+                <text x="${x0+dW/2}" y="${y0+dD+55}" text-anchor="middle" font-weight="900" font-size="32" fill="${itemMode==='dovetail'?'#c2410c':'#1e40af'}">${fmt(backWidth)}</text>
                 
                 <line x1="${x0}" y1="${y0-25}" x2="${x0+sLA}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+sLA/2}" y="${y0-35}" text-anchor="middle" font-size="20" font-weight="bold">${dLA.toFixed(3)}</text>
+                <text x="${x0+sLA/2}" y="${y0-35}" text-anchor="middle" font-size="20" font-weight="bold">${fmt(dLA)}</text>
                 <line x1="${x0+dW-sRA}" y1="${y0-25}" x2="${x0+dW}" y2="${y0-25}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+dW-sRA/2}" y="${y0-35}" text-anchor="middle" font-size="20" font-weight="bold">${dRA.toFixed(3)}</text>
+                <text x="${x0+dW-sRA/2}" y="${y0-35}" text-anchor="middle" font-size="20" font-weight="bold">${fmt(dRA)}</text>
                 
                 <line x1="${x0+sLA+12}" y1="${y0}" x2="${x0+sLA+12}" y2="${y0+sUD}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+sLA+22}" y="${y0+(sUD/2)}" text-anchor="start" font-size="22" font-weight="bold" fill="red">${udDisplay.toFixed(3)}</text>
+                <text x="${x0+sLA+22}" y="${y0+(sUD/2)}" text-anchor="start" font-size="22" font-weight="bold" fill="red">${fmt(udDisplay)}</text>
                 
                 <line x1="${x0+sLA}" y1="${y0+sUD+10}" x2="${x0+dW-sRA}" y2="${y0+sUD+10}" stroke="#000" marker-start="url(#m-s-${svgId})" marker-end="url(#m-e-${svgId})" />
-                <text x="${x0+sLA+(gap*scale)/2}" y="${y0+sUD+40}" text-anchor="middle" font-weight="bold" fill="red" font-size="28">${notchHorizontalWidth.toFixed(3)}</text>
+                <text x="${x0+sLA+(gap*scale)/2}" y="${y0+sUD+40}" text-anchor="middle" font-weight="bold" fill="red" font-size="28">${fmt(notchHorizontalWidth)}</text>
                 
-                <text x="${x0+dW}" y="${y0+dD-5}" text-anchor="end" font-size="14" font-weight="bold">T = ${t.toFixed(3)}</text>
+                <text x="${x0+dW}" y="${y0+dD-5}" text-anchor="end" font-size="14" font-weight="bold">T = ${fmt(t)}</text>
             `;
         }
 
@@ -329,7 +321,7 @@
                 container.innerHTML = `
                     <div class="print-header-single">
                         <div class="header-left">#${index+1} ${displayMode} - ${item.label}</div>
-                        <div class="header-right">QTY: ${item.qty} | W: ${item.width} | D: ${item.depth} | H: ${item.height}</div>
+                        <div class="header-right">QTY: ${item.qty} | W: ${fmt(item.width)} | D: ${fmt(item.depth)} | H: ${fmt(item.height)}</div>
                     </div>
                     <svg id="svg-p-${item.id}" viewBox="0 0 500 400"></svg>`;
                 printList.appendChild(container);
